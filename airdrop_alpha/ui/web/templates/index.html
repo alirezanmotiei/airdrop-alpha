@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirdropAlpha - Quantitative Airdrop Scouting & Valuation Engine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Marked.js for Markdown rendering in modal -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                        },
+                        glass: 'rgba(17, 24, 39, 0.75)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glassmorphism {
+            background: rgba(17, 24, 39, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-accent {
+            box-shadow: 0 0 25px -5px rgba(20, 184, 166, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-teal-500 selection:text-white"
+      x-data="airdropApp()" x-init="fetchAirdrops()">
+
+    <!-- Background Ambient Glow -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="absolute -top-40 left-1/4 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center pb-8 border-b border-slate-800 gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">🚀</span>
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                        AirdropAlpha
+                    </h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-950 text-teal-300 border border-teal-800">
+                        Institutional v0.1.0
+                    </span>
+                </div>
+                <p class="text-sm text-slate-400 mt-1">
+                    Institutional-Grade Quantitative Airdrop Scouting, Labor Valuation & Risk Shield
+                </p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button @click="refreshData()" :disabled="refreshing"
+                        class="px-4 py-2 rounded-xl text-sm font-medium glassmorphism hover:bg-slate-800 transition flex items-center gap-2 border border-slate-700">
+                    <span :class="{'animate-spin': refreshing}">🔄</span>
+                    <span x-text="refreshing ? 'Refreshing Pipeline...' : 'Sync Live Data'"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
+            <div class="glassmorphism p-5 rounded-2xl glow-accent border border-slate-800">
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Analyzed</div>
+                <div class="text-2xl font-bold text-white mt-1" x-text="totalProjects">--</div>
+                <div class="text-xs text-teal-400 mt-1">Aggregated Multi-Source</div>
+            </div>
+            
+            <div class="glassmorphism p-5 rounded-2xl border border-emerald-900/40 bg-emerald-950/20">
+                <div class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">100% Free Hunter</div>
+                <div class="text-2xl font-bold text-emerald-300 mt-1" x-text="freeCount">--</div>
+                <div class="text-xs text-emerald-400/80 mt-1">Zero Initial Capital Needed</div>
+            </div>
+
+            <div class="glassmorphism p-5 rounded-2xl border border-slate-800">
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Top Hourly Return (Ω)</div>
+                <div class="text-2xl font-bold text-teal-300 mt-1" x-text="'$' + maxWage + '/h'">--</div>
+                <div class="text-xs text-slate-400 mt-1">Max Labor Yield</div>
+            </div>
+
+            <div class="glassmorphism p-5 rounded-2xl border border-slate-800">
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Avg Safety Index</div>
+                <div class="text-2xl font-bold text-indigo-300 mt-1" x-text="avgSafety + ' / 100'">--</div>
+                <div class="text-xs text-indigo-400/80 mt-1">Drainer & Scam Shield</div>
+            </div>
+        </div>
+
+        <!-- Filter & Control Toolbar -->
+        <div class="glassmorphism p-5 rounded-2xl mb-8 border border-slate-800">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                
+                <!-- Search Box -->
+                <div class="md:col-span-4">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Search Protocol</label>
+                    <div class="relative">
+                        <input type="text" x-model="searchQuery" @input.debounce.300ms="fetchAirdrops()"
+                               placeholder="Search name, category, or chain..."
+                               class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition">
+                    </div>
+                </div>
+
+                <!-- 100% Free Hunter Toggle Button -->
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Capital Profile</label>
+                    <button @click="toggleFreeOnly()"
+                            :class="freeOnly ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-900/40' : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'"
+                            class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold border transition flex items-center justify-center gap-2">
+                        <span>🎯</span>
+                        <span x-text="freeOnly ? '100% Free Only (Active)' : 'Filter 100% Free Tasks'"></span>
+                    </button>
+                </div>
+
+                <!-- Category Selector -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Category</label>
+                    <select x-model="selectedCategory" @change="fetchAirdrops()"
+                            class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition">
+                        <option value="">All Sectors</option>
+                        <option value="DeFi">DeFi</option>
+                        <option value="L1/L2">L1 / L2</option>
+                        <option value="AI">AI / Crypto</option>
+                        <option value="DePIN">DePIN</option>
+                        <option value="GameFi">GameFi</option>
+                        <option value="SocialFi">SocialFi</option>
+                    </select>
+                </div>
+
+                <!-- Sort Metric Selector -->
+                <div class="md:col-span-3">
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Sort Metric</label>
+                    <select x-model="sortBy" @change="fetchAirdrops()"
+                            class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition">
+                        <option value="alpha_score">Composite Alpha Score</option>
+                        <option value="hourly_wage">Hourly Return ($/Hour) ⚡</option>
+                        <option value="hours_per_10usd">Hours per $10 Reward (Lowest) ⏳</option>
+                        <option value="safety_score">Safety Score (Max Security) 🛡️</option>
+                        <option value="expected_reward">Expected Payout ($)</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Airdrop Intelligence Table -->
+        <div class="glassmorphism rounded-2xl overflow-hidden border border-slate-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="text-xs uppercase bg-slate-900/90 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="px-5 py-4">#</th>
+                            <th class="px-5 py-4">Project</th>
+                            <th class="px-4 py-4">Category</th>
+                            <th class="px-4 py-4 text-center">Cost Model</th>
+                            <th class="px-4 py-4 text-center">Safety</th>
+                            <th class="px-4 py-4 text-right">Exp. Reward</th>
+                            <th class="px-4 py-4 text-right">Return / Hour (Ω)</th>
+                            <th class="px-4 py-4 text-right">Hours / $10 (H10)</th>
+                            <th class="px-4 py-4 text-center">Alpha Score</th>
+                            <th class="px-4 py-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60">
+                        <template x-for="(p, index) in airdrops" :key="p.id">
+                            <tr class="hover:bg-slate-900/50 transition">
+                                <td class="px-5 py-4 text-slate-500 font-mono" x-text="index + 1"></td>
+                                <td class="px-5 py-4 font-semibold text-white">
+                                    <div class="flex items-center gap-2">
+                                        <span x-text="p.name"></span>
+                                        <span class="text-xs text-slate-500 font-normal" x-text="'(' + p.source + ')'"></span>
+                                    </div>
+                                    <div class="text-xs text-slate-400 font-normal" x-text="p.chains.slice(0, 2).join(', ')"></div>
+                                </td>
+                                <td class="px-4 py-4">
+                                    <span class="px-2 py-0.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" x-text="p.category"></span>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <template x-if="p.cost_tier === '100% Free (Task Only)'">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800">
+                                            🟢 100% Free
+                                        </span>
+                                    </template>
+                                    <template x-if="p.cost_tier === 'Gas Only (< $5)'">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-950/80 text-yellow-400 border border-yellow-800">
+                                            🟡 Gas (< $5)
+                                        </span>
+                                    </template>
+                                    <template x-if="p.cost_tier === 'Capital Required'">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-950/80 text-red-400 border border-red-800">
+                                            🔴 Staking / TVL
+                                        </span>
+                                    </template>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <span :class="p.risk.safety_score >= 70 ? 'text-emerald-400' : (p.risk.safety_score >= 45 ? 'text-yellow-400' : 'text-red-400')"
+                                          class="font-bold font-mono" x-text="p.risk.safety_score.toFixed(0)">
+                                    </span>
+                                    <span class="text-xs text-slate-500">/100</span>
+                                </td>
+                                <td class="px-4 py-4 text-right font-medium text-white font-mono"
+                                    x-text="'$' + p.metrics.expected_reward_usd.toLocaleString()">
+                                </td>
+                                <td class="px-4 py-4 text-right font-bold text-emerald-400 font-mono"
+                                    x-text="'$' + p.metrics.hourly_wage_usd.toFixed(2) + '/h'">
+                                </td>
+                                <td class="px-4 py-4 text-right font-semibold text-yellow-300 font-mono"
+                                    x-text="p.metrics.hours_per_10usd.toFixed(2) + ' hrs'">
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-950/80 text-teal-300 border border-teal-800 font-mono"
+                                          x-text="p.metrics.alpha_score.toFixed(1)">
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-center">
+                                    <button @click="openMemoModal(p.slug)"
+                                            class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-teal-600 hover:text-white transition border border-slate-700">
+                                        Inspect Memo
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div x-show="airdrops.length === 0" class="py-16 text-center text-slate-400">
+                <span class="text-3xl">🔍</span>
+                <p class="mt-2 text-sm">No airdrops match your active criteria.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 1-Page Investment Memo Modal -->
+    <div x-show="showModal" x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+         style="display: none;">
+        <div class="glassmorphism w-full max-w-4xl max-h-[90vh] rounded-3xl overflow-hidden flex flex-col border border-slate-700 shadow-2xl"
+             @click.away="showModal = false">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/60">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📄</span>
+                    <h3 class="text-lg font-bold text-white" x-text="activeMemoTitle"></h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="copyMemoMarkdown()"
+                            class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition">
+                        <span x-text="copied ? 'Copied! ✅' : 'Copy Markdown'"></span>
+                    </button>
+                    <button @click="showModal = false"
+                            class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content (Rendered Markdown) -->
+            <div class="p-8 overflow-y-auto prose prose-invert prose-teal max-w-none text-slate-200 text-sm leading-relaxed"
+                 x-html="renderedMemoHtml">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Alpine.js Application Logic -->
+    <script>
+        function airdropApp() {
+            return {
+                airdrops: [],
+                totalProjects: {{ total_projects }},
+                freeCount: {{ free_count }},
+                avgWage: {{ avg_wage }},
+                maxWage: {{ max_wage }},
+                avgSafety: {{ avg_safety }},
+                searchQuery: '',
+                freeOnly: false,
+                selectedCategory: '',
+                sortBy: 'alpha_score',
+                refreshing: false,
+                showModal: false,
+                activeMemoTitle: '',
+                rawMemoMarkdown: '',
+                renderedMemoHtml: '',
+                copied: false,
+
+                async fetchAirdrops() {
+                    const params = new URLSearchParams({
+                        free_only: this.freeOnly,
+                        category: this.selectedCategory,
+                        sort_by: this.sortBy,
+                        search: this.searchQuery,
+                        limit: 100,
+                    });
+                    try {
+                        const res = await fetch(`/api/airdrops?${params.toString()}`);
+                        const data = await res.json();
+                        this.airdrops = data.data;
+                    } catch (e) {
+                        console.error("Failed to fetch airdrops:", e);
+                    }
+                },
+
+                toggleFreeOnly() {
+                    this.freeOnly = !this.freeOnly;
+                    this.fetchAirdrops();
+                },
+
+                async refreshData() {
+                    this.refreshing = true;
+                    try {
+                        await fetch('/api/refresh');
+                        await this.fetchAirdrops();
+                    } finally {
+                        this.refreshing = false;
+                    }
+                },
+
+                async openMemoModal(slug) {
+                    try {
+                        const res = await fetch(`/api/memo/${slug}`);
+                        const data = await res.json();
+                        this.activeMemoTitle = `Investment Memo: ${data.name}`;
+                        this.rawMemoMarkdown = data.memo_markdown;
+                        this.renderedMemoHtml = marked.parse(data.memo_markdown);
+                        this.showModal = true;
+                        this.copied = false;
+                    } catch (e) {
+                        console.error("Failed to load memo:", e);
+                    }
+                },
+
+                copyMemoMarkdown() {
+                    navigator.clipboard.writeText(this.rawMemoMarkdown);
+                    this.copied = true;
+                    setTimeout(() => { this.copied = false; }, 2000);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
