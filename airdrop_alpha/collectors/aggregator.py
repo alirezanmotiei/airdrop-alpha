@@ -22,6 +22,7 @@ from airdrop_alpha.models.roi_calculator import (
     calculate_expected_net_profit, calculate_labor_metrics, calculate_composite_alpha_score
 )
 from airdrop_alpha.models.risk_engine import evaluate_risk_profile
+from airdrop_alpha.models.url_verifier import verify_portal_url
 
 
 class AirdropAggregator:
@@ -154,6 +155,16 @@ class AirdropAggregator:
                 instructions=item.get("guide_steps", []),
             )
             
+            portal_url = item.get("website_url") or item.get("url") or ""
+            url_security = verify_portal_url(portal_url, item.get("name", ""))
+            
+            # If high risk phishing detected, penalize safety and flag drainer risk
+            if not url_security.is_safe:
+                risk.red_flags.extend(url_security.warnings)
+                risk.safety_score = max(5.0, risk.safety_score - 30.0)
+                if url_security.is_punycode or url_security.has_homoglyphs:
+                    risk.drainer_risk = True
+
             project = AirdropProject(
                 id=item["id"],
                 name=item["name"],
@@ -162,6 +173,8 @@ class AirdropAggregator:
                 url=item.get("url", ""),
                 website_url=item.get("website_url"),
                 whitepaper_url=item.get("whitepaper_url"),
+                direct_portal_url=portal_url,
+                url_security=url_security.model_dump(),
                 description=item.get("description", ""),
                 category=category,
                 chains=item.get("chains", ["Multi-Chain"]),
@@ -267,6 +280,9 @@ class AirdropAggregator:
                 ],
             )
             
+            portal_url = llama.get("website_url") or llama.get("url") or ""
+            url_security = verify_portal_url(portal_url, llama.get("name", ""))
+
             project = AirdropProject(
                 id=llama["id"],
                 name=llama["name"],
@@ -275,6 +291,8 @@ class AirdropAggregator:
                 url=llama.get("url", ""),
                 website_url=llama.get("website_url"),
                 twitter_handle=llama.get("twitter_handle"),
+                direct_portal_url=portal_url,
+                url_security=url_security.model_dump(),
                 description=llama.get("description", ""),
                 category=category,
                 chains=llama.get("chains", []),

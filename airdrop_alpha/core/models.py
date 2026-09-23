@@ -127,5 +127,9 @@ class AirdropProject(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
+    # Direct Participation Portal & Security Verification Report
+    direct_portal_url: Optional[str] = None
+    url_security: Optional[Dict[str, Any]] = None
+    
     # Raw data store for debugging or memo generation
     raw_metadata: Dict[str, Any] = Field(default_factory=dict)

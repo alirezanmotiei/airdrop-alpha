@@ -110,7 +110,17 @@ def _generate_memo_english(p, m, r, f, s) -> str:
 
 ---
 
-## 5. SECURITY & DRAINER SHIELD ASSESSMENT
+## 5. DIRECT PORTAL & DOMAIN VERIFICATION AUDIT
+- **Direct Action URL**: `{p.direct_portal_url or p.website_url or 'N/A'}`
+- **Domain Verification Status**: **{(p.url_security or {}).get('status', 'Unverified')}**
+- **SSL / HTTPS Security**: {'✅ Secured (HTTPS Protocol Verified)' if (p.url_security or {}).get('is_https') else '🚨 INSECURE HTTP DETECTED'}
+- **Anti-Phishing / Homograph Check**: {'✅ Clean Domain (No Punycode / IDN Spoofing)' if not (p.url_security or {}).get('is_punycode') else '🚨 CRITICAL: Punycode homograph attack detected!'}
+- **Verification Badges**: {', '.join((p.url_security or {}).get('verification_badges', ['Standard Web3 Listing']))}
+- **Security Guidance**: {(p.url_security or {}).get('guidance', 'Always verify SSL lock icon and official handles.')}
+
+---
+
+## 6. SECURITY & DRAINER SHIELD ASSESSMENT
 - **Safety Score**: **{r.safety_score:.1f} / 100** ({r.risk_level.value})
 - **Wallet Drainer Risk**: {'🚨 CRITICAL DRAINER RISK' if r.drainer_risk else '🛡️ No active drainer signatures detected'}
 
@@ -125,7 +135,7 @@ def _generate_memo_english(p, m, r, f, s) -> str:
 
 ---
 
-## 6. STEP-BY-STEP PARTICIPATION GUIDE
+## 7. STEP-BY-STEP PARTICIPATION GUIDE
 {steps_md}
 """
 
@@ -225,7 +235,17 @@ def _generate_memo_persian(p, m, r, f, s) -> str:
 
 ---
 
-## ۵. ارزیابی ریسک و سپر ضد درینر (Drainer Shield)
+## ۵. اعتبارسنجی اصالت آدرس اینترنتی و بررسی ضد فیشینگ (URL Security Audit)
+- **لینک مستقیم و رسمی ورود**: `{p.direct_portal_url or p.website_url or 'نامشخص'}`
+- **وضعیت اعتبارسنجی دامنه**: **{(p.url_security or {}).get('status', 'در انتظار اعتبارسنجی')}**
+- **امنیت پروتکل SSL / HTTPS**: {'✅ کاملاً ایمن (پروتکل HTTPS تأیید شد)' if (p.url_security or {}).get('is_https') else '🚨 ناامن: وبسایت از پروتکل ناامن HTTP استفاده می‌کند!'}
+- **بررسی حمله هم‌نگاره و پونی‌کد (Punycode/Homograph)**: {'✅ دامنه تمیز است (بدون حروف جعلی یا کاراکترهای مشابه)' if not (p.url_security or {}).get('is_punycode') else '🚨 خطر فوری: حمله پونی‌کد و جعل حروف شناسایی شد!'}
+- **نشان‌های اعتبارسنجی دامنه**: {', '.join((p.url_security or {}).get('verification_badges', ['ثبت‌شده در منابع وب۳']))}
+- **توصیه امنیتی**: {(p.url_security or {}).get('guidance', 'همواره آدرس را با توییتر رسمی پروژه چک کنید.')}
+
+---
+
+## ۶. ارزیابی ریسک و سپر ضد درینر (Drainer Shield)
 - **امتیاز امنیت**: **{r.safety_score:.1f} از ۱۰۰** ({r.risk_level.value})
 - **خطر درینر کیف‌پول**: {'🚨 هشدار: ریسک درخواست پرمیشن‌های مخرب' if r.drainer_risk else '🛡️ بدون امضای مخرب'}
 
@@ -240,7 +260,7 @@ def _generate_memo_persian(p, m, r, f, s) -> str:
 
 ---
 
-## ۶. راهنمای گام‌به‌گام مشارکت
+## ۷. راهنمای گام‌به‌گام مشارکت
 {steps_md}
 
 </div>

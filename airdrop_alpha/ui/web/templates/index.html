@@ -269,6 +269,26 @@
                                         <span class="text-xs text-slate-500 font-normal" x-text="'(' + p.source + ')'"></span>
                                     </div>
                                     <div class="text-xs text-slate-400 font-normal" x-text="p.chains.slice(0, 2).join(', ')"></div>
+                                    <!-- Direct Verified Portal Access -->
+                                    <div class="mt-1 flex items-center gap-1.5 text-xs" x-show="p.direct_portal_url">
+                                        <a :href="p.direct_portal_url" target="_blank" rel="noopener noreferrer"
+                                           class="inline-flex items-center gap-1 text-[11px] font-mono transition">
+                                            <template x-if="p.url_security && p.url_security.is_safe">
+                                                <span class="text-emerald-400 bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-800 flex items-center gap-1 hover:border-emerald-600">
+                                                    <span>🛡️</span>
+                                                    <span x-text="p.url_security.normalized_domain"></span>
+                                                    <span>↗</span>
+                                                </span>
+                                            </template>
+                                            <template x-if="p.url_security && !p.url_security.is_safe">
+                                                <span class="text-rose-400 bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800 font-bold flex items-center gap-1 hover:border-rose-600">
+                                                    <span>🚨</span>
+                                                    <span x-text="p.url_security.normalized_domain"></span>
+                                                    <span x-text="t('suspicious_tag') || 'Caution'"></span>
+                                                </span>
+                                            </template>
+                                        </a>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4">
                                     <span class="px-2 py-0.5 rounded-md text-xs font-medium bg-slate-800 text-slate-300" x-text="p.category"></span>
