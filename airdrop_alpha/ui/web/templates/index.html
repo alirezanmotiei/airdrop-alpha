@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" :dir="lang === 'fa' ? 'rtl' : 'ltr'">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,20 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Marked.js for Markdown rendering in modal -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Vazirmatn Persian Font for elegant typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Vazirmatn', 'sans-serif'],
+                        fa: ['Vazirmatn', '"Plus Jakarta Sans"', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
                             50: '#f0fdfa',
@@ -22,7 +31,6 @@
                             600: '#0d9488',
                             900: '#134e4a',
                         },
-                        glass: 'rgba(17, 24, 39, 0.75)',
                     }
                 }
             }
@@ -30,7 +38,7 @@
     </script>
     <style>
         .glassmorphism {
-            background: rgba(17, 24, 39, 0.82);
+            background: rgba(17, 24, 39, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -38,12 +46,15 @@
         .glow-accent {
             box-shadow: 0 0 25px -5px rgba(20, 184, 166, 0.25);
         }
+        [dir="rtl"] {
+            font-family: 'Vazirmatn', sans-serif;
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-teal-500 selection:text-white"
+<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-teal-500 selection:text-white"
       x-data="airdropApp()" x-init="fetchAirdrops()">
 
-    <!-- Background Ambient Glow -->
+    <!-- Ambient Glow -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div class="absolute -top-40 left-1/4 w-96 h-96 bg-teal-600/10 rounded-full blur-3xl"></div>
         <div class="absolute top-1/2 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
@@ -57,22 +68,57 @@
             <div>
                 <div class="flex items-center gap-3">
                     <span class="text-3xl">🚀</span>
-                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                    <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent"
+                        x-text="t('app_title')">
                         AirdropAlpha
                     </h1>
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-950 text-teal-300 border border-teal-800">
-                        Institutional v0.1.0
+                        v0.1.0 Institutional
                     </span>
                 </div>
-                <p class="text-sm text-slate-400 mt-1">
+                <p class="text-sm text-slate-400 mt-1" x-text="t('app_subtitle')">
                     Institutional-Grade Quantitative Airdrop Scouting, Labor Valuation & Risk Shield
                 </p>
             </div>
-            <div class="flex items-center gap-3">
+
+            <!-- Action Controls & Language Switcher -->
+            <div class="flex flex-wrap items-center gap-3">
+                
+                <!-- Language Toggle Button -->
+                <div class="flex items-center bg-slate-900 border border-slate-700 rounded-xl p-1">
+                    <button @click="setLanguage('en')"
+                            :class="lang === 'en' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'"
+                            class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                        <span>🇬🇧</span>
+                        <span>EN</span>
+                    </button>
+                    <button @click="setLanguage('fa')"
+                            :class="lang === 'fa' ? 'bg-teal-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'"
+                            class="px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                        <span>🇮🇷</span>
+                        <span>فارسی</span>
+                    </button>
+                </div>
+
+                <!-- Anti-Sybil Guide Button -->
+                <button @click="showSybilModal = true"
+                        class="px-3.5 py-2 rounded-xl text-xs font-semibold glassmorphism hover:bg-slate-800 text-yellow-300 border border-yellow-800/60 transition flex items-center gap-1.5">
+                    <span>🛡️</span>
+                    <span x-text="t('sybil_guide_btn')">Anti-Sybil Guide</span>
+                </button>
+
+                <!-- CSV Export Button -->
+                <button @click="exportCSV()"
+                        class="px-3.5 py-2 rounded-xl text-xs font-semibold glassmorphism hover:bg-slate-800 text-teal-300 border border-teal-800/60 transition flex items-center gap-1.5">
+                    <span>📥</span>
+                    <span x-text="t('export_csv_btn')">Export CSV</span>
+                </button>
+
+                <!-- Sync Live Data Button -->
                 <button @click="refreshData()" :disabled="refreshing"
-                        class="px-4 py-2 rounded-xl text-sm font-medium glassmorphism hover:bg-slate-800 transition flex items-center gap-2 border border-slate-700">
+                        class="px-4 py-2 rounded-xl text-xs font-semibold glassmorphism hover:bg-slate-800 text-slate-200 border border-slate-700 transition flex items-center gap-2">
                     <span :class="{'animate-spin': refreshing}">🔄</span>
-                    <span x-text="refreshing ? 'Refreshing Pipeline...' : 'Sync Live Data'"></span>
+                    <span x-text="refreshing ? t('syncing') : t('sync_btn')">Sync Live Data</span>
                 </button>
             </div>
         </header>
@@ -80,27 +126,64 @@
         <!-- KPI Metrics Grid -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 my-8">
             <div class="glassmorphism p-5 rounded-2xl glow-accent border border-slate-800">
-                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Total Analyzed</div>
-                <div class="text-2xl font-bold text-white mt-1" x-text="totalProjects">--</div>
-                <div class="text-xs text-teal-400 mt-1">Aggregated Multi-Source</div>
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold" x-text="t('kpi_total')">Total Analyzed</div>
+                <div class="text-2xl font-bold text-white mt-1 font-mono" x-text="totalProjects">--</div>
+                <div class="text-xs text-teal-400 mt-1" x-text="t('kpi_total_sub')">Multi-Source Feeds</div>
             </div>
             
             <div class="glassmorphism p-5 rounded-2xl border border-emerald-900/40 bg-emerald-950/20">
-                <div class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">100% Free Hunter</div>
-                <div class="text-2xl font-bold text-emerald-300 mt-1" x-text="freeCount">--</div>
-                <div class="text-xs text-emerald-400/80 mt-1">Zero Initial Capital Needed</div>
+                <div class="text-xs uppercase tracking-wider text-emerald-400 font-semibold" x-text="t('kpi_free')">100% Free Hunter</div>
+                <div class="text-2xl font-bold text-emerald-300 mt-1 font-mono" x-text="freeCount">--</div>
+                <div class="text-xs text-emerald-400/80 mt-1" x-text="t('kpi_free_sub')">Zero Capital Needed</div>
             </div>
 
             <div class="glassmorphism p-5 rounded-2xl border border-slate-800">
-                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Top Hourly Return (Ω)</div>
-                <div class="text-2xl font-bold text-teal-300 mt-1" x-text="'$' + maxWage + '/h'">--</div>
-                <div class="text-xs text-slate-400 mt-1">Max Labor Yield</div>
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold" x-text="t('kpi_wage')">Top Hourly Return</div>
+                <div class="text-2xl font-bold text-teal-300 mt-1 font-mono" x-text="'$' + maxWage + '/h'">--</div>
+                <div class="text-xs text-slate-400 mt-1" x-text="t('kpi_wage_sub')">Max Labor Yield</div>
             </div>
 
             <div class="glassmorphism p-5 rounded-2xl border border-slate-800">
-                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Avg Safety Index</div>
-                <div class="text-2xl font-bold text-indigo-300 mt-1" x-text="avgSafety + ' / 100'">--</div>
-                <div class="text-xs text-indigo-400/80 mt-1">Drainer & Scam Shield</div>
+                <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold" x-text="t('kpi_safety')">Avg Safety Index</div>
+                <div class="text-2xl font-bold text-indigo-300 mt-1 font-mono" x-text="avgSafety + ' / 100'">--</div>
+                <div class="text-xs text-indigo-400/80 mt-1" x-text="t('kpi_safety_sub')">Drainer Shield</div>
+            </div>
+        </div>
+
+        <!-- Personal ROI Simulator Card -->
+        <div class="glassmorphism p-6 rounded-2xl mb-8 border border-slate-800 bg-gradient-to-r from-slate-900/90 via-slate-900/60 to-teal-950/20">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-800/80">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🧮</span>
+                    <div>
+                        <h3 class="text-base font-bold text-white" x-text="t('sim_title')">Personal Farming ROI Simulator</h3>
+                        <p class="text-xs text-slate-400" x-text="t('sim_subtitle')">Simulate your expected monthly payoff based on time and wallet count</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-center mt-5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1" x-text="t('sim_hours_label')">Hours per Week</label>
+                    <input type="range" min="1" max="40" step="1" x-model="simHours"
+                           class="w-full accent-teal-500 bg-slate-800 cursor-pointer">
+                    <div class="text-sm font-bold text-teal-300 mt-1 font-mono" x-text="simHours + ' ' + t('hours_unit')"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1" x-text="t('sim_wallets_label')">Sybil-Safe Wallets</label>
+                    <input type="range" min="1" max="10" step="1" x-model="simWallets"
+                           class="w-full accent-teal-500 bg-slate-800 cursor-pointer">
+                    <div class="text-sm font-bold text-teal-300 mt-1 font-mono" x-text="simWallets + ' ' + t('wallets_unit')"></div>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400" x-text="t('sim_est_monthly')">Est. Monthly Expected Payout</div>
+                    <div class="text-2xl font-extrabold text-emerald-400 font-mono mt-1"
+                         x-text="'$' + calculateSimReturn().toLocaleString()"></div>
+                </div>
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <div class="text-xs text-slate-400" x-text="t('sim_opportunities')">Opportunities Covered</div>
+                    <div class="text-xl font-bold text-white font-mono mt-1"
+                         x-text="calculateCoveredDrops() + ' ' + t('projects_unit')"></div>
+                </div>
             </div>
         </div>
 
@@ -110,31 +193,29 @@
                 
                 <!-- Search Box -->
                 <div class="md:col-span-4">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Search Protocol</label>
-                    <div class="relative">
-                        <input type="text" x-model="searchQuery" @input.debounce.300ms="fetchAirdrops()"
-                               placeholder="Search name, category, or chain..."
-                               class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition">
-                    </div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1" x-text="t('filter_search')">Search Protocol</label>
+                    <input type="text" x-model="searchQuery" @input.debounce.300ms="fetchAirdrops()"
+                           :placeholder="t('search_placeholder')"
+                           class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-teal-500 transition">
                 </div>
 
                 <!-- 100% Free Hunter Toggle Button -->
                 <div class="md:col-span-3">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Capital Profile</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1" x-text="t('filter_capital')">Capital Profile</label>
                     <button @click="toggleFreeOnly()"
                             :class="freeOnly ? 'bg-emerald-600 text-white border-emerald-500 shadow-lg shadow-emerald-900/40' : 'bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800'"
                             class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold border transition flex items-center justify-center gap-2">
                         <span>🎯</span>
-                        <span x-text="freeOnly ? '100% Free Only (Active)' : 'Filter 100% Free Tasks'"></span>
+                        <span x-text="freeOnly ? t('btn_free_active') : t('btn_free_filter')">Filter 100% Free</span>
                     </button>
                 </div>
 
                 <!-- Category Selector -->
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Category</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1" x-text="t('filter_category')">Category</label>
                     <select x-model="selectedCategory" @change="fetchAirdrops()"
                             class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition">
-                        <option value="">All Sectors</option>
+                        <option value="" x-text="t('cat_all')">All Sectors</option>
                         <option value="DeFi">DeFi</option>
                         <option value="L1/L2">L1 / L2</option>
                         <option value="AI">AI / Crypto</option>
@@ -146,14 +227,14 @@
 
                 <!-- Sort Metric Selector -->
                 <div class="md:col-span-3">
-                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Sort Metric</label>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1" x-text="t('filter_sort')">Sort Metric</label>
                     <select x-model="sortBy" @change="fetchAirdrops()"
                             class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-teal-500 transition">
-                        <option value="alpha_score">Composite Alpha Score</option>
-                        <option value="hourly_wage">Hourly Return ($/Hour) ⚡</option>
-                        <option value="hours_per_10usd">Hours per $10 Reward (Lowest) ⏳</option>
-                        <option value="safety_score">Safety Score (Max Security) 🛡️</option>
-                        <option value="expected_reward">Expected Payout ($)</option>
+                        <option value="alpha_score" x-text="t('sort_alpha')">Composite Alpha Score</option>
+                        <option value="hourly_wage" x-text="t('sort_wage')">Hourly Return ($/Hour) ⚡</option>
+                        <option value="hours_per_10usd" x-text="t('sort_h10')">Hours per $10 Reward (Lowest) ⏳</option>
+                        <option value="safety_score" x-text="t('sort_safety')">Safety Score (Max Security) 🛡️</option>
+                        <option value="expected_reward" x-text="t('sort_reward')">Expected Payout ($)</option>
                     </select>
                 </div>
 
@@ -163,25 +244,25 @@
         <!-- Airdrop Intelligence Table -->
         <div class="glassmorphism rounded-2xl overflow-hidden border border-slate-800">
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-slate-300">
+                <table class="w-full text-sm text-slate-300 text-start">
                     <thead class="text-xs uppercase bg-slate-900/90 text-slate-400 border-b border-slate-800">
                         <tr>
-                            <th class="px-5 py-4">#</th>
-                            <th class="px-5 py-4">Project</th>
-                            <th class="px-4 py-4">Category</th>
-                            <th class="px-4 py-4 text-center">Cost Model</th>
-                            <th class="px-4 py-4 text-center">Safety</th>
-                            <th class="px-4 py-4 text-right">Exp. Reward</th>
-                            <th class="px-4 py-4 text-right">Return / Hour (Ω)</th>
-                            <th class="px-4 py-4 text-right">Hours / $10 (H10)</th>
-                            <th class="px-4 py-4 text-center">Alpha Score</th>
-                            <th class="px-4 py-4 text-center">Action</th>
+                            <th class="px-5 py-4 text-center">#</th>
+                            <th class="px-5 py-4 text-start" x-text="t('th_project')">Project</th>
+                            <th class="px-4 py-4 text-start" x-text="t('th_category')">Category</th>
+                            <th class="px-4 py-4 text-center" x-text="t('th_cost')">Cost Model</th>
+                            <th class="px-4 py-4 text-center" x-text="t('th_safety')">Safety</th>
+                            <th class="px-4 py-4 text-end" x-text="t('th_reward')">Exp. Reward</th>
+                            <th class="px-4 py-4 text-end" x-text="t('th_wage')">Return / Hour (Ω)</th>
+                            <th class="px-4 py-4 text-end" x-text="t('th_h10')">Hours / $10 (H10)</th>
+                            <th class="px-4 py-4 text-center" x-text="t('th_alpha')">Alpha Score</th>
+                            <th class="px-4 py-4 text-center" x-text="t('th_action')">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-800/60">
                         <template x-for="(p, index) in airdrops" :key="p.id">
                             <tr class="hover:bg-slate-900/50 transition">
-                                <td class="px-5 py-4 text-slate-500 font-mono" x-text="index + 1"></td>
+                                <td class="px-5 py-4 text-slate-500 font-mono text-center" x-text="index + 1"></td>
                                 <td class="px-5 py-4 font-semibold text-white">
                                     <div class="flex items-center gap-2">
                                         <span x-text="p.name"></span>
@@ -195,17 +276,17 @@
                                 <td class="px-4 py-4 text-center">
                                     <template x-if="p.cost_tier === '100% Free (Task Only)'">
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800">
-                                            🟢 100% Free
+                                            <span x-text="t('cost_free')">🟢 100% Free</span>
                                         </span>
                                     </template>
                                     <template x-if="p.cost_tier === 'Gas Only (< $5)'">
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-950/80 text-yellow-400 border border-yellow-800">
-                                            🟡 Gas (< $5)
+                                            <span x-text="t('cost_gas')">🟡 Gas (< $5)</span>
                                         </span>
                                     </template>
                                     <template x-if="p.cost_tier === 'Capital Required'">
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-950/80 text-red-400 border border-red-800">
-                                            🔴 Staking / TVL
+                                            <span x-text="t('cost_capital')">🔴 Staking / TVL</span>
                                         </span>
                                     </template>
                                 </td>
@@ -215,14 +296,14 @@
                                     </span>
                                     <span class="text-xs text-slate-500">/100</span>
                                 </td>
-                                <td class="px-4 py-4 text-right font-medium text-white font-mono"
+                                <td class="px-4 py-4 text-end font-medium text-white font-mono"
                                     x-text="'$' + p.metrics.expected_reward_usd.toLocaleString()">
                                 </td>
-                                <td class="px-4 py-4 text-right font-bold text-emerald-400 font-mono"
+                                <td class="px-4 py-4 text-end font-bold text-emerald-400 font-mono"
                                     x-text="'$' + p.metrics.hourly_wage_usd.toFixed(2) + '/h'">
                                 </td>
-                                <td class="px-4 py-4 text-right font-semibold text-yellow-300 font-mono"
-                                    x-text="p.metrics.hours_per_10usd.toFixed(2) + ' hrs'">
+                                <td class="px-4 py-4 text-end font-semibold text-yellow-300 font-mono"
+                                    x-text="p.metrics.hours_per_10usd.toFixed(2) + ' ' + t('hours_unit')">
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-teal-950/80 text-teal-300 border border-teal-800 font-mono"
@@ -232,7 +313,7 @@
                                 <td class="px-4 py-4 text-center">
                                     <button @click="openMemoModal(p.slug)"
                                             class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-teal-600 hover:text-white transition border border-slate-700">
-                                        Inspect Memo
+                                        <span x-text="t('btn_inspect_memo')">Inspect Memo</span>
                                     </button>
                                 </td>
                             </tr>
@@ -244,7 +325,7 @@
             <!-- Empty State -->
             <div x-show="airdrops.length === 0" class="py-16 text-center text-slate-400">
                 <span class="text-3xl">🔍</span>
-                <p class="mt-2 text-sm">No airdrops match your active criteria.</p>
+                <p class="mt-2 text-sm" x-text="t('empty_state')">No airdrops match your active criteria.</p>
             </div>
         </div>
 
@@ -266,7 +347,7 @@
                 <div class="flex items-center gap-2">
                     <button @click="copyMemoMarkdown()"
                             class="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition">
-                        <span x-text="copied ? 'Copied! ✅' : 'Copy Markdown'"></span>
+                        <span x-text="copied ? t('copied') : t('copy_memo')">Copy Markdown</span>
                     </button>
                     <button @click="showModal = false"
                             class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition">
@@ -277,16 +358,173 @@
 
             <!-- Modal Content (Rendered Markdown) -->
             <div class="p-8 overflow-y-auto prose prose-invert prose-teal max-w-none text-slate-200 text-sm leading-relaxed"
+                 :dir="lang === 'fa' ? 'rtl' : 'ltr'"
                  x-html="renderedMemoHtml">
             </div>
 
         </div>
     </div>
 
-    <!-- Alpine.js Application Logic -->
+    <!-- Anti-Sybil Best Practices Modal -->
+    <div x-show="showSybilModal" x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+         style="display: none;">
+        <div class="glassmorphism w-full max-w-2xl rounded-3xl overflow-hidden flex flex-col border border-slate-700 shadow-2xl"
+             @click.away="showSybilModal = false">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/80">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🛡️</span>
+                    <h3 class="text-lg font-bold text-white" x-text="t('sybil_modal_title')">Anti-Sybil Golden Rules</h3>
+                </div>
+                <button @click="showSybilModal = false" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="p-6 space-y-4 text-sm text-slate-300 leading-relaxed" :dir="lang === 'fa' ? 'rtl' : 'ltr'">
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div class="font-bold text-teal-400 mb-1" x-text="t('sybil_rule_1_title')">1. Segregate Wallet Funding Sources</div>
+                    <p class="text-xs text-slate-400" x-text="t('sybil_rule_1_desc')">Never fund multiple burner wallets from the exact same deposit address or CEX account. Use separate sub-accounts or multi-hop bridges.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div class="font-bold text-teal-400 mb-1" x-text="t('sybil_rule_2_title')">2. Randomize Interaction Timestamps</div>
+                    <p class="text-xs text-slate-400" x-text="t('sybil_rule_2_desc')">Do not execute transactions on different wallets within minutes of each other. Randomize by 2 to 6 hours or different days.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <div class="font-bold text-teal-400 mb-1" x-text="t('sybil_rule_3_title')">3. Maintain Organic Multi-Protocol History</div>
+                    <p class="text-xs text-slate-400" x-text="t('sybil_rule_3_desc')">Wallets with interactions on Uniswap, Aave, Gitcoin Passport, or ENS are 90% less likely to be disqualified.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alpine.js Application Logic with Complete i18n Dictionary -->
     <script>
+        const I18N = {
+            en: {
+                app_title: "AirdropAlpha",
+                app_subtitle: "Institutional-Grade Quantitative Airdrop Scouting, Labor Valuation & Risk Shield",
+                sync_btn: "Sync Live Data",
+                syncing: "Refreshing Pipeline...",
+                export_csv_btn: "Export CSV",
+                sybil_guide_btn: "Anti-Sybil Guide",
+                kpi_total: "Total Analyzed",
+                kpi_total_sub: "Multi-Source Feeds",
+                kpi_free: "100% Free Hunter",
+                kpi_free_sub: "Zero Capital Needed",
+                kpi_wage: "Top Hourly Return",
+                kpi_wage_sub: "Max Labor Yield",
+                kpi_safety: "Avg Safety Index",
+                kpi_safety_sub: "Drainer Shield",
+                sim_title: "Personal Farming ROI Simulator",
+                sim_subtitle: "Simulate your expected monthly payoff based on time and wallet count",
+                sim_hours_label: "Hours per Week",
+                sim_wallets_label: "Sybil-Safe Wallets",
+                sim_est_monthly: "Est. Monthly Expected Payout",
+                sim_opportunities: "Opportunities Covered",
+                hours_unit: "hrs",
+                wallets_unit: "wallets",
+                projects_unit: "protocols",
+                filter_search: "Search Protocol",
+                search_placeholder: "Search name, category, or chain...",
+                filter_capital: "Capital Profile",
+                btn_free_filter: "Filter 100% Free Tasks",
+                btn_free_active: "100% Free Only (Active)",
+                filter_category: "Category",
+                cat_all: "All Sectors",
+                filter_sort: "Sort Metric",
+                sort_alpha: "Composite Alpha Score",
+                sort_wage: "Hourly Return ($/Hour) ⚡",
+                sort_h10: "Hours per $10 Reward (Lowest) ⏳",
+                sort_safety: "Safety Score (Max Security) 🛡️",
+                sort_reward: "Expected Payout ($)",
+                th_project: "Project",
+                th_category: "Category",
+                th_cost: "Cost Model",
+                th_safety: "Safety",
+                th_reward: "Exp. Reward",
+                th_wage: "Return / Hour (Ω)",
+                th_h10: "Hours / $10 (H10)",
+                th_alpha: "Alpha Score",
+                th_action: "Action",
+                cost_free: "🟢 100% Free",
+                cost_gas: "🟡 Gas (< $5)",
+                cost_capital: "🔴 Staking / TVL",
+                btn_inspect_memo: "Inspect Memo",
+                empty_state: "No airdrops match your active criteria.",
+                copy_memo: "Copy Markdown",
+                copied: "Copied! ✅",
+                sybil_modal_title: "Anti-Sybil Golden Rules",
+                sybil_rule_1_title: "1. Segregate Wallet Funding Sources",
+                sybil_rule_1_desc: "Never fund multiple burner wallets from the exact same deposit address or CEX account. Use separate sub-accounts or multi-hop bridges.",
+                sybil_rule_2_title: "2. Randomize Interaction Timestamps",
+                sybil_rule_2_desc: "Do not execute transactions on different wallets within minutes of each other. Randomize by 2 to 6 hours or different days.",
+                sybil_rule_3_title: "3. Maintain Organic Multi-Protocol History",
+                sybil_rule_3_desc: "Wallets with interactions on Uniswap, Aave, Gitcoin Passport, or ENS are 90% less likely to be disqualified.",
+            },
+            fa: {
+                app_title: "ایردراپ‌آلفا (AirdropAlpha)",
+                app_subtitle: "سامانه کمّی و هوشمند رصد، ارزش‌گذاری مالی و ارزیابی ریسک ایردراپ‌های وب۳",
+                sync_btn: "همگام‌سازی زنده",
+                syncing: "در حال بروزرسانی...",
+                export_csv_btn: "خروجی اکسل (CSV)",
+                sybil_guide_btn: "راهنمای ضد سیبیل",
+                kpi_total: "کل پروژه‌های رصدشده",
+                kpi_total_sub: "پایش از فیدهای زنده",
+                kpi_free: "شکارچی ۱۰۰٪ رایگان",
+                kpi_free_sub: "بدون نیاز به سرمایه اولیه",
+                kpi_wage: "بیشترین بازده ساعتی",
+                kpi_wage_sub: "حداکثر سود بر ساعت کار",
+                kpi_safety: "میانگین شاخص امنیت",
+                kpi_safety_sub: "سپر ضد درینر و اسکم",
+                sim_title: "شبیه‌ساز سود ماهانه شخصی",
+                sim_subtitle: "تخمین پاداش ماهانه بر اساس ساعات اختصاص‌یافته و تعداد کیف‌پول‌ها",
+                sim_hours_label: "ساعت کار در هفته",
+                sim_wallets_label: "تعداد کیف‌پول‌ها",
+                sim_est_monthly: "پاداش ماهانه تخمینی",
+                sim_opportunities: "پروژه‌های قابل پوشش",
+                hours_unit: "ساعت",
+                wallets_unit: "کیف‌پول",
+                projects_unit: "پروژه",
+                filter_search: "جستجوی پروژه",
+                search_placeholder: "نام، دسته‌بندی یا شبکه را جستجو کنید...",
+                filter_capital: "پروفایل سرمایه ورودی",
+                btn_free_filter: "فیلتر ۱۰۰٪ رایگان (بدون سرمایه)",
+                btn_free_active: "فقط ۱۰۰٪ رایگان (فعال)",
+                filter_category: "دسته‌بندی",
+                cat_all: "همه حوزه‌ها",
+                filter_sort: "شاخص مرتب‌سازی",
+                sort_alpha: "امتیاز ترکیبی آلفا",
+                sort_wage: "بیشترین سود در ساعت ($/Hour) ⚡",
+                sort_h10: "کمترین زمان به ازای ۱۰$ سود (H10) ⏳",
+                sort_safety: "بیشترین امتیاز امنیت و پشتوانه 🛡️",
+                sort_reward: "بالاترین پاداش دلاری ($)",
+                th_project: "نام پروژه",
+                th_category: "دسته‌بندی",
+                th_cost: "مدل سرمایه",
+                th_safety: "امنیت",
+                th_reward: "پاداش تخمینی",
+                th_wage: "بازده ساعتی (Ω)",
+                th_h10: "زمان به ازای ۱۰$ (H10)",
+                th_alpha: "امتیاز آلفا",
+                th_action: "عملیات",
+                cost_free: "🟢 ۱۰۰٪ رایگان",
+                cost_gas: "🟡 کارمزد گس (< ۵$)",
+                cost_capital: "🔴 استیکینگ / نقدینگی",
+                btn_inspect_memo: "مشاهده گزارش",
+                empty_state: "هیچ پروژه‌ای با معیارهای فیلتر فعال شما همخوانی ندارد.",
+                copy_memo: "کپی مارک‌داون",
+                copied: "کپی شد! ✅",
+                sybil_modal_title: "قوانین طلایی جلوگیری از شناسایی به عنوان سیبیل (Anti-Sybil)",
+                sybil_rule_1_title: "۱. تفکیک آدرس‌های واریز و صرافی",
+                sybil_rule_1_desc: "هرگز چند کیف‌پول مختلف را از یک آدرس واریز صرافی یا ولت اصلی مشترک شارژ نکنید. رد تراکنش‌ها در آن‌چین کلاستر می‌شود.",
+                sybil_rule_2_title: "۲. تصادفی‌سازی زمان تراکنش‌ها",
+                sybil_rule_2_desc: "تراکنش‌های ولت‌های مختلف را پشت سر هم انجام ندهید. حداقل ۲ تا ۶ ساعت و در روزهای مختلف فاصله بیندازید.",
+                sybil_rule_3_title: "۳. ایجاد تاریخچه طبیعی در پروتکل‌های معتبر",
+                sybil_rule_3_desc: "ولت‌هایی که چند تراکنش متفرقه در یونی‌سواپ یا آوه دارند، به مراتب کمتر از ولت‌های خام به عنوان ربات پرچم‌گذاری می‌شوند.",
+            }
+        };
+
         function airdropApp() {
             return {
+                lang: 'fa', // Default to Persian as requested by user
                 airdrops: [],
                 totalProjects: {{ total_projects }},
                 freeCount: {{ free_count }},
@@ -299,10 +537,24 @@
                 sortBy: 'alpha_score',
                 refreshing: false,
                 showModal: false,
+                showSybilModal: false,
                 activeMemoTitle: '',
                 rawMemoMarkdown: '',
                 renderedMemoHtml: '',
                 copied: false,
+
+                // Simulator State
+                simHours: 6,
+                simWallets: 2,
+
+                t(key) {
+                    return (I18N[this.lang] && I18N[this.lang][key]) || (I18N['en'][key]) || key;
+                },
+
+                setLanguage(newLang) {
+                    this.lang = newLang;
+                    document.documentElement.setAttribute('dir', newLang === 'fa' ? 'rtl' : 'ltr');
+                },
 
                 async fetchAirdrops() {
                     const params = new URLSearchParams({
@@ -338,9 +590,9 @@
 
                 async openMemoModal(slug) {
                     try {
-                        const res = await fetch(`/api/memo/${slug}`);
+                        const res = await fetch(`/api/memo/${slug}?lang=${this.lang}`);
                         const data = await res.json();
-                        this.activeMemoTitle = `Investment Memo: ${data.name}`;
+                        this.activeMemoTitle = this.lang === 'fa' ? `یادداشت تحلیلی: ${data.name}` : `Investment Memo: ${data.name}`;
                         this.rawMemoMarkdown = data.memo_markdown;
                         this.renderedMemoHtml = marked.parse(data.memo_markdown);
                         this.showModal = true;
@@ -354,6 +606,34 @@
                     navigator.clipboard.writeText(this.rawMemoMarkdown);
                     this.copied = true;
                     setTimeout(() => { this.copied = false; }, 2000);
+                },
+
+                calculateSimReturn() {
+                    const monthlyHours = this.simHours * 4;
+                    const avgHourly = this.avgWage > 0 ? Math.min(this.avgWage, 180.0) : 60.0;
+                    const returnEstimate = monthlyHours * avgHourly * (1 + (this.simWallets - 1) * 0.75);
+                    return Math.round(returnEstimate);
+                },
+
+                calculateCoveredDrops() {
+                    const monthlyHours = this.simHours * 4;
+                    return Math.min(this.airdrops.length, Math.max(2, Math.round(monthlyHours / 1.5)));
+                },
+
+                exportCSV() {
+                    if (!this.airdrops.length) return;
+                    let csv = "ID,Name,Category,Cost_Tier,Safety_Score,Expected_Reward_USD,Hourly_Wage_USD,Hours_per_10USD,Alpha_Score\n";
+                    this.airdrops.forEach(p => {
+                        csv += `"${p.id}","${p.name}","${p.category}","${p.cost_tier}",${p.risk.safety_score},${p.metrics.expected_reward_usd},${p.metrics.hourly_wage_usd},${p.metrics.hours_per_10usd},${p.metrics.alpha_score}\n`;
+                    });
+                    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", `airdrop_alpha_export_${Date.now()}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
                 }
             }
         }

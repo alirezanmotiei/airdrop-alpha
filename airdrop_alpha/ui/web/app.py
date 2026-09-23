@@ -103,17 +103,18 @@ async def get_airdrops_api(
 
 
 @app.get("/api/memo/{slug}")
-async def get_memo_api(slug: str):
-    """Returns 1-Page Investment Memo in Markdown for specified project."""
+async def get_memo_api(slug: str, lang: str = "en"):
+    """Returns 1-Page Investment Memo in Markdown for specified project in chosen language (en or fa)."""
     projects = get_dataset()
     target = next((p for p in projects if p.slug == slug or p.id == slug), None)
     if not target:
         raise HTTPException(status_code=404, detail="Project not found")
         
-    memo_md = generate_investment_memo(target)
+    memo_md = generate_investment_memo(target, lang=lang)
     return {
         "slug": target.slug,
         "name": target.name,
+        "lang": lang,
         "memo_markdown": memo_md,
     }
 
