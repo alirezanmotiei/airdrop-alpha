@@ -1,8 +1,8 @@
 <h1 align="center">AirdropAlpha</h1>
 
 <p align="center">
-  <strong>Institutional-Grade Quantitative Airdrop Scouting, Valuation & Risk Evaluation Engine</strong><br>
-  <em>A Quantitative Intelligence Framework for Web3 Airdrop Opportunities, Labor Economics, and Phishing Defense</em><br>
+  <strong>Institutional-Grade Quantitative Protocol Intelligence & Sybil-Resistance Risk Engine</strong><br>
+  <em>An Applied Quantitative Economics, Sybil-Resistance Risk Modeling & Graph Anomaly Detection Framework for Decentralized Networks</em><br>
   <strong>Author:</strong> Alireza Najafi Motiei (<a href="https://github.com/alirezanmotiei">@alirezanmotiei</a>)
 </p>
 
@@ -19,14 +19,14 @@
 
 ## 📖 Executive Summary
 
-**AirdropAlpha** is an institutional-grade quantitative research and intelligence system engineered to systematically scout, value, risk-audit, and rank Web3 cryptocurrency airdrops. In decentralized finance (DeFi), participants frequently suffer from asymmetric information, disguised phishing links ("wallet drainers"), and sub-optimal capital/time allocation on low-yield farming programs.
+**AirdropAlpha** is an institutional-grade quantitative intelligence and risk-auditing framework engineered to systematically model token allocations, evaluate protocol labor economics, audit cybersecurity risks, and detect on-chain anomalies in decentralized protocols. In decentralized networks, participants and analysts frequently encounter asymmetric information, adversarial Sybil clustering, disguised homoglyph phishing links ("wallet drainers"), and miscalculated capital/time resource allocation.
 
 AirdropAlpha addresses these challenges through a mathematically rigorous multi-stage pipeline:
-1. **Multi-Source Intelligence Ingestion**: Live automated scraping and normalization of active airdrops from AirdropAlert RSS, over 3,800 tokenless protocols from DefiLlama, and community discussion feeds from Reddit (`r/CryptoAirdrop`, `r/airdrop`, `r/CryptoCurrency`).
-2. **Quantitative Valuation & Labor Economics Modeling**: Formulates an Implied Fully Diluted Valuation ($FDV^*$) using sector comps and VC step-ups, models participant dilution using Sybil-discounted Pareto power-law distributions, and derives the **Hourly Return on Effort ($\Omega_{\text{effort}}$)** and the **Hours required per \$10 net reward ($H_{10}$)**.
-3. **URL Deep Inspection & Phishing Defense Shield**: Deep-packet analysis of action URLs to detect punycode attacks, homoglyph spoofing (e.g. Cyrillic characters), suspicious drainer keywords, and abused disposable TLDs.
-4. **Multi-Factor Risk Scoring**: Evaluates VC tiering (Paradigm, a16z, Binance Labs), smart contract audits (OpenZeppelin, Trail of Bits), and social sentiment NLP.
-5. **Interactive Dual-Interface Delivery**: Delivers insights via an interactive **Rich Terminal CLI** and a modern **Glassmorphism Web Dashboard** featuring a **Bilingual (English & Persian) Engine**, a **Personal Farming ROI Simulator**, and 1-Click **1-Page Investment Memo Generation**.
+1. **Multi-Source Intelligence Ingestion**: Automated ingestion and normalization of protocol data across decentralized indices, DefiLlama tokenless metrics (3,800+ protocols), and social sentiment telemetry.
+2. **Quantitative Valuation & Labor Economics Modeling**: Formulates an Implied Fully Diluted Valuation ($FDV^*$) using sector comps and venture stage step-ups, models participant dilution using Sybil-discounted Pareto power-law distributions, and derives the **Hourly Return on Effort ($\Omega_{\text{effort}}$)** and the **Hours required per \$10 net return ($H_{10}$)**.
+3. **URL Deep Inspection & Phishing Defense Shield**: Deep-packet analysis of action URLs to detect punycode attacks, homoglyph spoofing (e.g. Cyrillic character substitutions), malicious drainer signatures, and disposable TLD anomalies.
+4. **Multi-Factor Risk Scoring**: Evaluates VC tiering syndicates, smart contract security audits, and automated NLP social sentiment.
+5. **Dual-Interface Analytical Delivery**: Delivers real-time analytics via an interactive **Rich Terminal CLI** and a modern **Glassmorphism Web Dashboard** featuring a **Bilingual (English & Persian) Engine**, a **Labor Economics & Incentive Mechanism Simulator**, and automated **1-Page Research Memo Generation**.
 
 ---
 
@@ -85,13 +85,13 @@ Flagged domains containing Cyrillic character substitutions (e.g., `xn--...` or 
 
 ## 🌟 Key Capabilities & Features
 
-* **🎯 Zero-Capital / 100% Free Hunter Mode**: 1-click filter separating 100% zero-cost tasks (faucets, testnets, social quests) from capital-intensive staking or gas-heavy transactions.
-* **🛡️ Deep URL Verification Shield**: Automatic verification of official protocol links against DefiLlama registries to protect users from malicious wallet drainers.
-* **🗣️ Reddit & Twitter Social Sentiment**: Automated NLP scanner detecting community scam alerts (`drainer`, `scam`, `fake`, `phishing`) vs positive validation (`legit`, `confirmed`, `binance labs`).
-* **🌍 Bilingual Engine (English & Persian)**: Dynamic RTL/LTR toggle supporting Persian (Vazirmatn typography) and English with bidirectional text isolation.
-* **🧮 Personal Farming ROI Simulator**: Interactive dashboard tool simulating expected monthly returns based on available weekly hours and burner wallet counts.
-* **📄 Automated 1-Page Investment Memo**: Generates institutional research memos in Markdown and HTML with anti-sybil self-check guidelines.
-* **🌐 Enterprise Proxy Support**: Out-of-the-box compatibility with HTTP, HTTPS, and SOCKS5 proxies (`HTTP_PROXY`, `ALL_PROXY`, or CLI flags) for unrestricted worldwide access.
+* **🎯 Zero-Capital Protocol Classification**: Dynamic classification separating 100% zero-cost tasks (testnets, cryptographic attestations, governance tasks) from capital-intensive liquidity provision.
+* **🛡️ Deep URL Verification Shield**: Automated cryptographic and heuristic verification of protocol endpoints against curated registries to neutralize malicious wallet drainers.
+* **🗣️ Multi-Source Sentiment NLP**: Real-time natural language processing scanner detecting security alerts (`drainer`, `exploit`, `phishing`) versus institutional backing.
+* **🌍 Bilingual Analytical Engine (English & Persian)**: Dynamic RTL/LTR interface supporting Persian and English with bidirectional text isolation.
+* **🧮 Labor Economics & Yield Simulator**: Interactive simulation engine modeling expected returns based on resource allocation, opportunity costs, and Sybil-discounted cohort distributions.
+* **📄 Automated Protocol Research Memos**: Institutional research memo generation in Markdown and HTML with anti-Sybil diagnostics and risk audits.
+* **🌐 Enterprise Proxy & Ingestion Layer**: Resilient network ingestion pipeline compatible with HTTP, HTTPS, and SOCKS5 proxies for decentralized data collection.
 
 ---
 
